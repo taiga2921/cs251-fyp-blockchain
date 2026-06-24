@@ -14,6 +14,16 @@ The Blockchain Module provides a **tamper-evident proof layer**: Laravel stores 
 
 The contract stores **only `bytes32` hashes**. It does **not** store plate numbers, GPS coordinates, user data, images, patrol routes, or raw JSON evidence.
 
+## M8 status
+
+**Milestone M8 — Verification system** is complete in `backend-laravel-v1/`:
+
+- `App\Services\Blockchain\BlockchainVerificationService` — recompute hash, compare locally, on-chain `verifyHash(bytes32)` via `eth_call`
+- `POST /api/blockchain-records/{id}/verify` — Admin + Security Operator manual verification
+- Persists `blockchain_verifications` and `blockchain_jobs` (`job_type = verify`)
+
+Laravel does **not** implement Sepolia deployment (M9), M10 auto-anchoring, or M11 dashboard UI in M8.
+
 ## M7 status
 
 **Milestone M7 — Retry and failure handling** is complete in `backend-laravel-v1/`:
@@ -150,7 +160,8 @@ blockchain-ethereum-v1/
     ├── m4-deterministic-hashing-architecture.md
     ├── m5-blockchain-record-service-and-read-apis.md
     ├── m6-ganache-anchoring-end-to-end.md
-    └── m7-retry-and-failure-handling.md
+    ├── m7-retry-and-failure-handling.md
+    └── m8-verification-system.md
 ```
 
 ## What does **not** belong here
@@ -162,6 +173,7 @@ blockchain-ethereum-v1/
 
 ## Documentation
 
+- [`docs/m8-verification-system.md`](docs/m8-verification-system.md) — M8 Laravel verification summary
 - [`docs/m7-retry-and-failure-handling.md`](docs/m7-retry-and-failure-handling.md) — M7 Laravel retry/failure handling summary
 - [`docs/m6-ganache-anchoring-end-to-end.md`](docs/m6-ganache-anchoring-end-to-end.md) — M6 Laravel Ganache anchoring summary
 - [`docs/m5-blockchain-record-service-and-read-apis.md`](docs/m5-blockchain-record-service-and-read-apis.md) — M5 Laravel record service summary
@@ -180,5 +192,6 @@ blockchain-ethereum-v1/
 | **M5** (Laravel) | `BlockchainRecordService` — pending proof rows — **complete** |
 | **M6** (Laravel) | Ganache anchoring (`EthereumRpcClient`, `AnchorBlockchainRecordJob`) — **complete** |
 | **M7** (Laravel) | Retry strategy and failure handling — **complete** |
+| **M8** (Laravel) | Verification system — **complete** |
 | **M9** (this folder) | Sepolia deployment |
 | **M11** (frontend) | Blockchain monitoring dashboard via Laravel APIs |
