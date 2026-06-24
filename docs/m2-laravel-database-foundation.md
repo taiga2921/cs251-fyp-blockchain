@@ -45,9 +45,9 @@ Provide a durable, testable persistence layer so later milestones can:
 | Models | `BlockchainRecord`, `BlockchainJob`, `BlockchainVerification` |
 | Resources | `BlockchainRecordResource`, `BlockchainJobResource`, `BlockchainVerificationResource` |
 | Factories | All three with realistic states |
-| Tests | `BlockchainDatabaseFoundationTest` (11 cases) |
-| Seeder | `BlockchainRecordSeeder` updated for new fields |
-| Controller | Expanded status/environment filters on existing read API |
+| Tests | `BlockchainDatabaseFoundationTest` (12 cases after M2 cleanup) |
+| Seeder | `BlockchainRecordSeeder` updated for new fields (**opt-in** — not run by default) |
+| Controller | Expanded status/environment filters; `show` eager-loads related rows; Admin/Security Operator access |
 
 ---
 
@@ -107,7 +107,9 @@ Laravel remains the **source of truth**. On-chain anchoring is still **not** imp
 | `app/Http/Resources/BlockchainRecordResource.php` |
 | `app/Http/Controllers/Api/BlockchainRecordController.php` |
 | `database/seeders/BlockchainRecordSeeder.php` |
+| `database/seeders/DatabaseSeeder.php` |
 | `backend-laravel-v1/documentation.md` |
+| `frontend-react-v1/documentation.md` |
 
 ---
 
@@ -141,7 +143,7 @@ Stores verification attempts and results (`valid`, `tampered`, `pending`, `faile
 ```text
 BlockchainRecord hasMany BlockchainJob
 BlockchainRecord hasMany BlockchainVerification
-BlockchainRecord morphTo entity
+BlockchainRecord morphTo entity (semantic key — see caveat below)
 
 BlockchainJob belongsTo BlockchainRecord
 
@@ -151,13 +153,17 @@ BlockchainVerification belongsTo User (verifiedBy)
 User hasMany BlockchainVerification (verified_by)
 ```
 
+**`entity()` caveat:** `entity_type` values such as `anpr_event` are semantic module keys. `morphTo()` is retained for future use but **must not** be relied on until a morph map or resolver is added in M4/M5+.
+
 ---
 
 ## 9. Factory and Test Coverage
 
 **Factories** support states such as `pending`, `queued`, `submitted`, `confirmed`, `failed` records; successful/failed jobs; valid/tampered/pending/failed/onchain_missing verifications.
 
-**Tests** (`php artisan test --filter=Blockchain`): 11 passing cases covering migrations/schema, factories, relationships, casts, scopes, unique constraint, resource field safety, and existing read API field names.
+**Tests** (`php artisan test --filter=Blockchain`): 12 passing cases covering migrations/schema, factories, relationships, casts, scopes, unique constraint, resource field safety, show API with related rows, and Admin/Security Operator access boundary.
+
+**Seeding:** `BlockchainRecordSeeder` provides safe mock demo rows. It is **not** registered in `DatabaseSeeder` by default; run `php artisan db:seed --class=BlockchainRecordSeeder` when demo blockchain rows are needed locally.
 
 ---
 
@@ -188,7 +194,7 @@ User hasMany BlockchainVerification (verified_by)
 | `blockchain_records` aligned with module design | Yes |
 | `blockchain_jobs` and `blockchain_verifications` created | Yes |
 | Models, relationships, factories, resources | Yes |
-| Tests pass (`--filter=Blockchain`) | Yes (11/11) |
+| Tests pass (`--filter=Blockchain`) | Yes (12/12) |
 | `migrate:fresh` succeeds | Yes |
 | No Ethereum RPC / hashing / queue execution | Yes |
 | Documentation updated | Yes |
@@ -204,6 +210,21 @@ User hasMany BlockchainVerification (verified_by)
 3. Validate required config when blockchain is enabled.
 
 M2 provides the tables and models M3+ services will use. Do not start hashing (M4) or anchoring (M6) before configuration (M3) is in place.
+
+---
+
+## 14. M2 Cleanup Follow-Up (post-review)
+
+Small hardening applied after initial M2 acceptance. **No M3+ functionality was added.**
+
+| Item | Resolution |
+| --- | --- |
+| `BlockchainRecord::entity()` | Kept with docblock — semantic `entity_type` keys require a future morph map before business logic should call `entity()` |
+| `BlockchainRecordController@show` | Eager-loads `jobs`, `verifications`, `verifications.verifiedBy` |
+| API access control | Reused existing `AuthorizesPatrolMonitoring` trait (Admin + Security Operator; Guards forbidden) |
+| `BlockchainRecordSeeder` | Remains **opt-in**; commented in `DatabaseSeeder` with explicit note |
+| Documentation | Backend + frontend docs updated; file list corrected in this document |
+| Frontend | No blockchain UI implemented — dashboard remains **M11**; SPA still must not call Ethereum RPC directly |
 
 ---
 
