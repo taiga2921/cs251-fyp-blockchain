@@ -243,7 +243,19 @@ Covers:
 
 ---
 
-## 10. Known Limitations
+## 10. Troubleshooting
+
+### Record has `tx_hash` but `last_error = Transaction receipt is not yet available`
+
+The Sepolia transaction may already be submitted even though the RPC node has not returned a receipt yet.
+
+1. Check the `tx_hash` on [Sepolia Etherscan](https://sepolia.etherscan.io/) — a successful transaction means anchoring is in progress or complete.
+2. Run or restart `php artisan queue:work` — the receipt-first recovery path in `AnchorBlockchainRecordJob` should confirm the existing transaction **without** submitting a duplicate `storeHash`.
+3. Do **not** create a new `blockchain_record` for the same entity/proof; retry or let the queue worker finish recovery on the existing row.
+
+---
+
+## 11. Known Limitations
 
 - **No live Sepolia in CI** — deployment and anchoring demos require real RPC and test ETH.
 - **`ext-gmp` required** for production Sepolia signing on the Laravel server.
@@ -253,7 +265,7 @@ Covers:
 
 ---
 
-## 11. Not Delivered in M9
+## 12. Not Delivered in M9
 
 | Item | Milestone |
 | --- | --- |
@@ -266,7 +278,7 @@ Covers:
 
 ---
 
-## 12. Related Documentation
+## 13. Related Documentation
 
 - [`m8-verification-system.md`](m8-verification-system.md) — verification APIs and strict ABI bool decoding
 - [`m6-ganache-anchoring-end-to-end.md`](m6-ganache-anchoring-end-to-end.md) — Ganache anchoring baseline
