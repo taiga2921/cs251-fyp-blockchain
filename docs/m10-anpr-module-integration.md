@@ -117,7 +117,7 @@ When `BLOCKCHAIN_ENABLED=false`:
 
 - `blockchain_proof` — safe summary for the event creation proof (`BlockchainProofSummaryResource`)
 - `image_blockchain_proof_summary` — count, status list, confirmed count for loaded image proofs
-- Per-image `blockchain_proof` when image proofs are attached on detail responses
+- Per-image `blockchain_proof` on event detail and on direct image API responses (`GET/POST /api/anpr-images`, upload endpoints) when a proof exists
 
 **Not exposed:** private keys, raw canonical JSON, `record_hash` in summary resource, absolute local paths, RPC URLs.
 
@@ -169,6 +169,7 @@ Repeat steps 2–7 with `BLOCKCHAIN_NETWORK=sepolia`, valid Sepolia contract add
 
 - Re-uploading the same image type updates the file but reuses the existing proof row (idempotent by entity). Post-replacement verification may report **tampered** relative to the original anchored hash.
 - Metadata-only image rows (unresolvable file path) anchor deterministic metadata proofs with `evidence_hash_source=metadata`.
+- **`submitted` status** means the transaction was sent/mined but required confirmations may not be met yet. Sepolia records with `BLOCKCHAIN_CONFIRMATION_BLOCKS > 1` remain `submitted` until `RefreshSubmittedBlockchainRecordJob` or `php artisan blockchain:refresh-submitted` rechecks the existing `tx_hash`. Ganache reset/restart can orphan local tx hashes; refresh eventually marks those as `failed` with a sanitized not-found message.
 - Full blockchain monitoring dashboard is not included (see M11).
 - Event **updates** do not create new blockchain proofs in M10.
 

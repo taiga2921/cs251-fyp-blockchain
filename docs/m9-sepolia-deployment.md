@@ -245,6 +245,15 @@ Covers:
 
 ## 10. Troubleshooting
 
+### Record stays `submitted` with `confirmations = 1` and `confirmed_at = null`
+
+This is expected when `BLOCKCHAIN_CONFIRMATION_BLOCKS` is greater than the current confirmation count (for example `2` on Sepolia while only one block has passed).
+
+1. Wait for additional Sepolia blocks to be mined.
+2. Run `php artisan blockchain:refresh-submitted --network=sepolia --environment=staging` (or `--sync` for immediate inline refresh).
+3. Ensure `php artisan queue:work` is running so scheduled `refresh_confirmation` jobs execute.
+4. Refresh re-checks the **existing** `tx_hash` only; it does not submit a duplicate transaction.
+
 ### Record has `tx_hash` but `last_error = Transaction receipt is not yet available`
 
 The Sepolia transaction may already be submitted even though the RPC node has not returned a receipt yet.
