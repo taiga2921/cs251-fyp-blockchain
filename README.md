@@ -14,6 +14,16 @@ The Blockchain Module provides a **tamper-evident proof layer**: Laravel stores 
 
 The contract stores **only `bytes32` hashes**. It does **not** store plate numbers, GPS coordinates, user data, images, patrol routes, or raw JSON evidence.
 
+## M3 status
+
+**Milestone M3 — Configuration and environment management** is complete in `backend-laravel-v1/`:
+
+- Laravel reads blockchain settings from `backend-laravel-v1/config/blockchain.php` and `BLOCKCHAIN_*` env vars
+- Validation command: `php artisan blockchain:check-config` (from the Laravel app directory)
+- Blockchain is **disabled by default** (`BLOCKCHAIN_ENABLED=false`)
+
+This Ethereum folder still contains **contract tooling only**. Laravel does **not** submit transactions or call RPC from M3.
+
 ## M1 status
 
 **Milestone M1 — Ethereum project foundation is complete** in this folder:
@@ -93,7 +103,9 @@ blockchain-ethereum-v1/
 │   └── sepolia/          # M9 placeholder
 └── docs/
     ├── m0-architecture-finalization-and-repository-split.md
-    └── m1-ethereum-project-foundation.md
+    ├── m1-ethereum-project-foundation.md
+    ├── m2-laravel-database-foundation.md
+    └── m3-configuration-and-environment-management.md
 ```
 
 ## What does **not** belong here
@@ -105,6 +117,8 @@ blockchain-ethereum-v1/
 
 ## Documentation
 
+- [`docs/m3-configuration-and-environment-management.md`](docs/m3-configuration-and-environment-management.md) — M3 Laravel config summary
+- [`docs/m2-laravel-database-foundation.md`](docs/m2-laravel-database-foundation.md) — M2 database/models summary
 - [`docs/m1-ethereum-project-foundation.md`](docs/m1-ethereum-project-foundation.md) — M1 implementation summary
 - [`docs/m0-architecture-finalization-and-repository-split.md`](docs/m0-architecture-finalization-and-repository-split.md) — M0 architecture decisions
 - [`blockchain-module.md`](blockchain-module.md) — full module plan (M0–M13)
@@ -113,7 +127,7 @@ blockchain-ethereum-v1/
 
 | Milestone | Scope |
 | --- | --- |
-| **M2–M5** (Laravel) | Database extensions, config, hashing, read/write APIs |
+| **M4** (Laravel) | Deterministic hashing (`BlockchainHashService`) |
 | **M6** (Laravel) | `EthereumRpcClient`, Ganache anchoring jobs |
 | **M9** (this folder) | Sepolia deployment |
 | **M11** (frontend) | Blockchain monitoring dashboard via Laravel APIs |
