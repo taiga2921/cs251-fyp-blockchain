@@ -1,10 +1,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
-
-function sampleHash(label) {
-  return ethers.keccak256(ethers.toUtf8Bytes(label));
-}
+const { sha256Bytes32 } = require("../scripts/lib/sampleHash");
 
 describe("EvidenceStore", function () {
   let evidenceStore;
@@ -23,13 +20,13 @@ describe("EvidenceStore", function () {
   });
 
   it("owner can store a valid hash", async function () {
-    const hash = sampleHash("m1-test-hash-alpha");
+    const hash = sha256Bytes32("test-hash-owner-store");
     await expect(evidenceStore.storeHash(hash)).to.not.be.reverted;
     expect(await evidenceStore.verifyHash(hash)).to.equal(true);
   });
 
   it("emits HashStored with expected hash and sender", async function () {
-    const hash = sampleHash("m1-test-hash-event");
+    const hash = sha256Bytes32("test-hash-event");
     const ownerAddress = await owner.getAddress();
     await expect(evidenceStore.storeHash(hash))
       .to.emit(evidenceStore, "HashStored")
@@ -37,13 +34,13 @@ describe("EvidenceStore", function () {
   });
 
   it("verifyHash(storedHash) returns true", async function () {
-    const hash = sampleHash("m1-test-hash-verify-true");
+    const hash = sha256Bytes32("test-hash-verify-true");
     await evidenceStore.storeHash(hash);
     expect(await evidenceStore.verifyHash(hash)).to.equal(true);
   });
 
   it("verifyHash(unknownHash) returns false", async function () {
-    const unknown = sampleHash("m1-test-hash-unknown");
+    const unknown = sha256Bytes32("test-hash-unknown");
     expect(await evidenceStore.verifyHash(unknown)).to.equal(false);
   });
 
@@ -52,13 +49,13 @@ describe("EvidenceStore", function () {
   });
 
   it("rejects duplicate hash storage", async function () {
-    const hash = sampleHash("m1-test-hash-duplicate");
+    const hash = sha256Bytes32("test-hash-duplicate");
     await evidenceStore.storeHash(hash);
     await expect(evidenceStore.storeHash(hash)).to.be.revertedWith("Hash already stored");
   });
 
   it("non-owner cannot store a hash", async function () {
-    const hash = sampleHash("m1-test-hash-non-owner");
+    const hash = sha256Bytes32("test-hash-non-owner");
     await expect(evidenceStore.connect(other).storeHash(hash)).to.be.revertedWith("Not authorized");
   });
 
@@ -75,13 +72,13 @@ describe("EvidenceStore", function () {
   });
 
   it("old owner cannot store after transfer", async function () {
-    const hash = sampleHash("m1-test-hash-after-transfer-old");
+    const hash = sha256Bytes32("test-hash-transfer-old-owner");
     await evidenceStore.transferOwnership(await other.getAddress());
     await expect(evidenceStore.storeHash(hash)).to.be.revertedWith("Not authorized");
   });
 
   it("new owner can store after transfer", async function () {
-    const hash = sampleHash("m1-test-hash-after-transfer-new");
+    const hash = sha256Bytes32("test-hash-transfer-owner");
     await evidenceStore.transferOwnership(await other.getAddress());
     await expect(evidenceStore.connect(other).storeHash(hash)).to.not.be.reverted;
     expect(await evidenceStore.verifyHash(hash)).to.equal(true);

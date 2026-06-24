@@ -55,7 +55,7 @@ npm test
 npm run deploy:ganache
 ```
 
-4. Verify one harmless sample hash on the deployed contract:
+4. Verify one harmless sample hash on the deployed contract (includes chain ID and bytecode sanity checks):
 
 ```bash
 npm run verify:ganache

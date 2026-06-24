@@ -183,8 +183,23 @@ Console deployment summary
 
 ## 11. Verification Script Flow
 
+**M1 hardening:** Before storing a sample hash, `scripts/verify-deployment.js` performs deployment sanity checks:
+
+1. Validates required deployment JSON fields: `address`, `chainId`, `abi` (missing values fail first).
+2. Validates `address` is a well-formed Ethereum address (`ethers.isAddress`) and `chainId` is a positive integer.
+3. Reads the live chain ID from the connected RPC provider and compares it to `deployment.chainId`. On mismatch, fails with expected vs actual chain ID and likely causes (wrong RPC URL, wrong network, Ganache reset).
+4. Calls `ethers.provider.getCode(deployment.address)`. If bytecode is empty (`0x`), fails with guidance to rerun `npm run deploy:ganache` (stale JSON or reset Ganache).
+
+Only after these checks pass:
+
 ```text
 Read deployments/ganache/EvidenceStore.json
+        ↓
+Validate address, chainId, abi
+        ↓
+Assert live chain ID matches deployment.chainId
+        ↓
+Assert bytecode exists at deployment.address
         ↓
 Connect EvidenceStore at deployed address
         ↓
@@ -197,7 +212,7 @@ verifyHash(sampleHash) must return true
 Print success summary (address, chainId, hash, tx hash if any)
 ```
 
-Re-running verification is idempotent: if the sample hash is already stored, no new transaction is submitted.
+Re-running verification is idempotent: if the sample hash is already stored, no new transaction is submitted. The script does not print private keys or use real evidence labels.
 
 ---
 
@@ -206,6 +221,8 @@ Re-running verification is idempotent: if the sample hash is already stored, no 
 **Command:** `npm test` (`hardhat test`)
 
 **File:** `test/EvidenceStore.test.js`
+
+**M1 hardening:** Test hashes use the shared `sha256Bytes32()` helper from `scripts/lib/sampleHash.js` (SHA-256 over harmless labels), consistent with the Laravel canonical hashing architecture. Zero-hash rejection tests still use `ethers.ZeroHash`.
 
 | # | Test case | Result |
 | --- | --- | --- |
@@ -225,7 +242,7 @@ Re-running verification is idempotent: if the sample hash is already stored, no 
 
 **Total:** 13 passing (Hardhat in-memory network).
 
-Test hashes use `keccak256(utf8Bytes(label))` with harmless labels (e.g. `m1-test-hash-alpha`).
+Example labels: `test-hash-owner-store`, `test-hash-event`, `test-hash-duplicate`, `test-hash-transfer-owner`.
 
 ---
 
