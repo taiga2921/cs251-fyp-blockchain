@@ -14,6 +14,19 @@ The Blockchain Module provides a **tamper-evident proof layer**: Laravel stores 
 
 The contract stores **only `bytes32` hashes**. It does **not** store plate numbers, GPS coordinates, user data, images, patrol routes, or raw JSON evidence.
 
+## M10 status
+
+**Milestone M10 — ANPR module integration** is complete in `backend-laravel-v1/` and `frontend-react-v1/` (detail visibility):
+
+- Automatic `blockchain_records` for new ANPR events (`entity_created`) and evidence images (`evidence_file`) when `BLOCKCHAIN_ENABLED=true`
+- Async anchoring via existing `AnchorBlockchainRecordJob` (Ganache + Sepolia unchanged)
+- ANPR APIs do not wait for chain confirmation; disabled mode leaves ANPR unchanged
+- Lightweight blockchain proof section on ANPR event detail (Laravel API data only)
+
+See [`docs/m10-anpr-module-integration.md`](docs/m10-anpr-module-integration.md) for architecture, payloads, tests, and smoke-test steps.
+
+Laravel does **not** implement M11 full blockchain dashboard UI in M10.
+
 ## M9 status
 
 **Milestone M9 — Sepolia deployment** is complete:
@@ -193,7 +206,8 @@ blockchain-ethereum-v1/
     ├── m6-ganache-anchoring-end-to-end.md
     ├── m7-retry-and-failure-handling.md
     ├── m8-verification-system.md
-    └── m9-sepolia-deployment.md
+    ├── m9-sepolia-deployment.md
+    └── m10-anpr-module-integration.md
 ```
 
 ## What does **not** belong here
@@ -205,6 +219,7 @@ blockchain-ethereum-v1/
 
 ## Documentation
 
+- [`docs/m10-anpr-module-integration.md`](docs/m10-anpr-module-integration.md) — M10 ANPR auto-anchoring summary
 - [`docs/m9-sepolia-deployment.md`](docs/m9-sepolia-deployment.md) — M9 Sepolia deployment summary
 - [`docs/m8-verification-system.md`](docs/m8-verification-system.md) — M8 Laravel verification summary
 - [`docs/m7-retry-and-failure-handling.md`](docs/m7-retry-and-failure-handling.md) — M7 Laravel retry/failure handling summary
@@ -227,4 +242,5 @@ blockchain-ethereum-v1/
 | **M7** (Laravel) | Retry strategy and failure handling — **complete** |
 | **M8** (Laravel) | Verification system — **complete** |
 | **M9** (this folder + Laravel) | Sepolia deployment and signed anchoring — **complete** |
+| **M10** (Laravel + React detail) | ANPR auto-anchoring and detail proof visibility — **complete** |
 | **M11** (frontend) | Blockchain monitoring dashboard via Laravel APIs |
