@@ -14,6 +14,17 @@ The Blockchain Module provides a **tamper-evident proof layer**: Laravel stores 
 
 The contract stores **only `bytes32` hashes**. It does **not** store plate numbers, GPS coordinates, user data, images, patrol routes, or raw JSON evidence.
 
+## M7 status
+
+**Milestone M7 — Retry and failure handling** is complete in `backend-laravel-v1/`:
+
+- `App\Services\Blockchain\BlockchainRetryService` — exponential backoff, retry eligibility, error sanitization
+- Refactored `App\Jobs\AnchorBlockchainRecordJob` — business retries with `retry_anchor` audit rows
+- `POST /api/blockchain-records/{id}/retry` — Admin-only manual retry
+- Receipt-first recovery when `tx_hash` exists (no duplicate `storeHash`)
+
+Laravel does **not** implement Sepolia anchoring, M8 verification APIs, M10 auto-anchoring, or M11 dashboard UI in M7.
+
 ## M6 status
 
 **Milestone M6 — Ganache anchoring end-to-end** is complete in `backend-laravel-v1/`:
@@ -22,7 +33,7 @@ The contract stores **only `bytes32` hashes**. It does **not** store plate numbe
 - `App\Jobs\AnchorBlockchainRecordJob` — anchoring worker with `blockchain_jobs` audit rows
 - `BlockchainRecordService` dispatches anchoring when `BLOCKCHAIN_ENABLED=true`
 
-Laravel does **not** implement Sepolia anchoring, M7 retries, M8 verification APIs, or M11 dashboard UI in M6.
+Laravel does **not** implement Sepolia anchoring, M8 verification APIs, or M11 dashboard UI in M6.
 
 ## M5 status
 
@@ -138,7 +149,8 @@ blockchain-ethereum-v1/
     ├── m3-configuration-and-environment-management.md
     ├── m4-deterministic-hashing-architecture.md
     ├── m5-blockchain-record-service-and-read-apis.md
-    └── m6-ganache-anchoring-end-to-end.md
+    ├── m6-ganache-anchoring-end-to-end.md
+    └── m7-retry-and-failure-handling.md
 ```
 
 ## What does **not** belong here
@@ -150,6 +162,7 @@ blockchain-ethereum-v1/
 
 ## Documentation
 
+- [`docs/m7-retry-and-failure-handling.md`](docs/m7-retry-and-failure-handling.md) — M7 Laravel retry/failure handling summary
 - [`docs/m6-ganache-anchoring-end-to-end.md`](docs/m6-ganache-anchoring-end-to-end.md) — M6 Laravel Ganache anchoring summary
 - [`docs/m5-blockchain-record-service-and-read-apis.md`](docs/m5-blockchain-record-service-and-read-apis.md) — M5 Laravel record service summary
 - [`docs/m4-deterministic-hashing-architecture.md`](docs/m4-deterministic-hashing-architecture.md) — M4 Laravel hashing summary
@@ -166,6 +179,6 @@ blockchain-ethereum-v1/
 | **M4** (Laravel) | Deterministic hashing (`BlockchainHashService`) — **complete** |
 | **M5** (Laravel) | `BlockchainRecordService` — pending proof rows — **complete** |
 | **M6** (Laravel) | Ganache anchoring (`EthereumRpcClient`, `AnchorBlockchainRecordJob`) — **complete** |
-| **M7** (Laravel) | Retry strategy and failure handling |
+| **M7** (Laravel) | Retry strategy and failure handling — **complete** |
 | **M9** (this folder) | Sepolia deployment |
 | **M11** (frontend) | Blockchain monitoring dashboard via Laravel APIs |
