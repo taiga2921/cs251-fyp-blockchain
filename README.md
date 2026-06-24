@@ -14,6 +14,19 @@ The Blockchain Module provides a **tamper-evident proof layer**: Laravel stores 
 
 The contract stores **only `bytes32` hashes**. It does **not** store plate numbers, GPS coordinates, user data, images, patrol routes, or raw JSON evidence.
 
+## M9 status
+
+**Milestone M9 — Sepolia deployment** is complete:
+
+- Hardhat `sepolia` network (`SEPOLIA_RPC_URL`, `SEPOLIA_PRIVATE_KEY`, chain ID `11155111`)
+- `npm run deploy:sepolia` → `deployments/sepolia/EvidenceStore.json`
+- `npm run verify:sepolia` — network-aware deployment verification
+- Laravel Sepolia anchoring via `eth_sendRawTransaction` (`EthereumTransactionSigner` + `EthereumRpcClient`)
+
+See [`docs/m9-sepolia-deployment.md`](docs/m9-sepolia-deployment.md) for setup, Laravel configuration, and manual smoke-test steps.
+
+Laravel does **not** implement M10 ANPR auto-anchoring or M11 dashboard UI in M9.
+
 ## M8 status
 
 **Milestone M8 — Verification system** is complete in `backend-laravel-v1/`:
@@ -128,6 +141,23 @@ npm run verify:ganache
 npm run export:abi
 ```
 
+## Sepolia deployment (M9)
+
+1. Set `SEPOLIA_RPC_URL` and `SEPOLIA_PRIVATE_KEY` in local `.env` (never commit private keys). The wallet needs Sepolia ETH.
+2. Deploy:
+
+```bash
+npm run deploy:sepolia
+```
+
+3. Verify sample hash on the deployed contract:
+
+```bash
+npm run verify:sepolia
+```
+
+4. Copy `address` from `deployments/sepolia/EvidenceStore.json` into Laravel `BLOCKCHAIN_CONTRACT_ADDRESS`.
+
 ### Deployment JSON
 
 After `npm run deploy:ganache`, metadata is written to:
@@ -145,13 +175,14 @@ blockchain-ethereum-v1/
 ├── contracts/EvidenceStore.sol
 ├── scripts/
 │   ├── deploy-ganache.js
+│   ├── deploy-sepolia.js
 │   ├── export-abi.js
 │   ├── verify-deployment.js
 │   └── lib/
 ├── test/EvidenceStore.test.js
 ├── deployments/
 │   ├── ganache/EvidenceStore.json
-│   └── sepolia/          # M9 placeholder
+│   └── sepolia/EvidenceStore.json   # after M9 deploy
 └── docs/
     ├── m0-architecture-finalization-and-repository-split.md
     ├── m1-ethereum-project-foundation.md
@@ -161,7 +192,8 @@ blockchain-ethereum-v1/
     ├── m5-blockchain-record-service-and-read-apis.md
     ├── m6-ganache-anchoring-end-to-end.md
     ├── m7-retry-and-failure-handling.md
-    └── m8-verification-system.md
+    ├── m8-verification-system.md
+    └── m9-sepolia-deployment.md
 ```
 
 ## What does **not** belong here
@@ -173,6 +205,7 @@ blockchain-ethereum-v1/
 
 ## Documentation
 
+- [`docs/m9-sepolia-deployment.md`](docs/m9-sepolia-deployment.md) — M9 Sepolia deployment summary
 - [`docs/m8-verification-system.md`](docs/m8-verification-system.md) — M8 Laravel verification summary
 - [`docs/m7-retry-and-failure-handling.md`](docs/m7-retry-and-failure-handling.md) — M7 Laravel retry/failure handling summary
 - [`docs/m6-ganache-anchoring-end-to-end.md`](docs/m6-ganache-anchoring-end-to-end.md) — M6 Laravel Ganache anchoring summary
@@ -193,5 +226,5 @@ blockchain-ethereum-v1/
 | **M6** (Laravel) | Ganache anchoring (`EthereumRpcClient`, `AnchorBlockchainRecordJob`) — **complete** |
 | **M7** (Laravel) | Retry strategy and failure handling — **complete** |
 | **M8** (Laravel) | Verification system — **complete** |
-| **M9** (this folder) | Sepolia deployment |
+| **M9** (this folder + Laravel) | Sepolia deployment and signed anchoring — **complete** |
 | **M11** (frontend) | Blockchain monitoring dashboard via Laravel APIs |

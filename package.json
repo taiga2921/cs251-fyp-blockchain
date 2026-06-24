@@ -8,6 +8,8 @@
     "test": "hardhat test",
     "deploy:ganache": "hardhat run scripts/deploy-ganache.js --network ganache",
     "verify:ganache": "hardhat run scripts/verify-deployment.js --network ganache",
+    "deploy:sepolia": "hardhat run scripts/deploy-sepolia.js --network sepolia",
+    "verify:sepolia": "hardhat run scripts/verify-deployment.js --network sepolia",
     "export:abi": "hardhat run scripts/export-abi.js"
   },
   "devDependencies": {
