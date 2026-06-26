@@ -14,6 +14,17 @@ The Blockchain Module provides a **tamper-evident proof layer**: Laravel stores 
 
 The contract stores **only `bytes32` hashes**. It does **not** store plate numbers, GPS coordinates, user data, images, patrol routes, or raw JSON evidence.
 
+## M11 status
+
+**Milestone M11 — Blockchain monitoring frontend** is complete in `frontend-react-v1/` with small Laravel API support in `backend-laravel-v1/`:
+
+- Dashboard at `/admin/blockchain-monitoring` (Admin + Security Operator)
+- Record detail with jobs, verifications, payload summary, verify/retry/refresh actions
+- `GET /api/blockchain-records/summary` and list `search` support
+- Laravel API only — no Web3 or browser RPC in React
+
+See [`docs/m11-blockchain-monitoring-frontend.md`](docs/m11-blockchain-monitoring-frontend.md) for architecture, routes, tests, and smoke-test steps.
+
 ## M10 status
 
 **Milestone M10 — ANPR module integration** is complete in `backend-laravel-v1/` and `frontend-react-v1/` (detail visibility):
