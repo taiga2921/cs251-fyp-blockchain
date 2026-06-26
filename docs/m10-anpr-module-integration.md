@@ -30,7 +30,7 @@ EthereumRpcClient → Ganache or Sepolia EvidenceStore.storeHash(bytes32)
 - Backend-managed blockchain linkage; clients cannot supply `blockchain_record_id` on ANPR create/update.
 - Automatic proof creation is skipped entirely when blockchain is disabled (no pending rows, no queue dispatch).
 - Blockchain configuration failures during automatic proof creation are logged and do not fail ANPR writes.
-- Image file replacement reuses the same `anpr_images` row; existing proof rows remain idempotent by entity/proof/environment. Verification may report **tampered** if file metadata or content changes after anchoring.
+- Image file replacement reuses the same `anpr_images` row **only before** an `evidence_file` blockchain proof exists for **any** row matching event + `image_type`. After proof creation, upload replacement, canonical-field updates, delete, and parent event delete return **409 Conflict** so anchored evidence cannot become stale silently.
 
 ## Files changed
 
@@ -134,9 +134,10 @@ React uses Laravel API data only. No Web3, wallet, or direct RPC libraries were 
 
 | Command | Result |
 |---------|--------|
-| `php artisan test --filter=Blockchain` | **197 passed** |
-| `php artisan test --filter=Anpr` | **79 passed** |
-| `php artisan test` | **318 passed** |
+| `php artisan test --filter=AnprBlockchainIntegrationTest` | **19 passed** |
+| `php artisan test --filter=Blockchain` | **220 passed** |
+| `php artisan test --filter=Anpr` | **92 passed** |
+| `php artisan test` | **341 passed** |
 | `npm run test` (frontend-react-v1) | **29 passed** |
 
 Tests use `Bus::fake()` / `Http::fake()` so feature tests do not execute live queue workers or Ethereum RPC.
@@ -167,7 +168,7 @@ Repeat steps 2–7 with `BLOCKCHAIN_NETWORK=sepolia`, valid Sepolia contract add
 
 ## Known limitations
 
-- Re-uploading the same image type updates the file but reuses the existing proof row (idempotent by entity). Post-replacement verification may report **tampered** relative to the original anchored hash.
+- Re-uploading the same image type updates the file and reuses the existing row **only when no matching `evidence_file` blockchain proof exists** (checked across all rows for the event + `image_type`, not only the first row). After proof creation, evidence is immutable (upload/update/delete return **409**). `DELETE /api/anpr-events/{id}` is blocked when the event has an `entity_created` proof or any child image has an `evidence_file` proof. Immutability is enforced even when `BLOCKCHAIN_ENABLED=false` if a proof row already exists from a prior enabled run.
 - Metadata-only image rows (unresolvable file path) anchor deterministic metadata proofs with `evidence_hash_source=metadata`.
 - **`submitted` status** means the transaction was sent/mined but required confirmations may not be met yet. Sepolia records with `BLOCKCHAIN_CONFIRMATION_BLOCKS > 1` remain `submitted` until `RefreshSubmittedBlockchainRecordJob` or `php artisan blockchain:refresh-submitted` rechecks the existing `tx_hash`. Ganache reset/restart can orphan local tx hashes; refresh eventually marks those as `failed` with a sanitized not-found message.
 - Full blockchain monitoring dashboard is not included (see M11).
