@@ -11,6 +11,8 @@ M11 delivers the **React blockchain monitoring dashboard** for administrators an
 
 The dashboard supports list filtering, summary metrics, record inspection, manual verification, Admin-only retry, and optional confirmation refresh for submitted records with a transaction hash.
 
+A **follow-up polish patch** after initial M11 delivery addressed dashboard request concurrency, backend-aligned status labels, and README milestone consistency. No new API endpoints or routes were added in that patch.
+
 ## 2. Scope and non-scope
 
 ### In scope
@@ -94,6 +96,16 @@ Layering mirrors `feature/anpr-monitoring` and `feature/patrol-monitoring`:
 | **repositories** | Query building, envelope normalization, display helpers |
 | **datasources** | HTTP calls + error normalization |
 | **components** | Presentational UI |
+
+### Quality assurance — dashboard request concurrency
+
+`useBlockchainMonitoringController` uses **latest-request-wins** loading for the dashboard list and summary:
+
+- Each `loadData()` call receives a monotonic request ID.
+- Multiple in-flight requests are allowed (no `inFlightRef` early-return gate).
+- Only the **latest** request may update `records`, `summary`, `pagination`, `loading`, `refreshing`, and `error`.
+- Stale responses are ignored in success, error, and `finally` paths.
+- This protects **manual refresh** and **filter/search/page** changes made while an earlier request is still unresolved.
 
 ## 5. Routes and role access
 
@@ -212,6 +224,43 @@ Uses `standardTableHeadCellSx`, `standardTablePaperSx`, `standardTableRowSx`, `P
 - Shown for **submitted** records with a `tx_hash`
 - Calls `POST /api/blockchain-records/{id}/refresh`
 
+### Status display model
+
+Frontend chips and repository labels align with backend enums. Unknown values render safely using **snake_case → title-case** fallback (for example `custom_state` → `Custom State`).
+
+#### `blockchain_records.status`
+
+| Raw value | Display label |
+|-----------|---------------|
+| `pending` | Pending |
+| `queued` | Queued |
+| `processing` | Processing |
+| `submitted` | Submitted |
+| `confirmed` | Confirmed |
+| `failed` | Failed |
+
+#### `blockchain_jobs.status`
+
+| Raw value | Display label |
+|-----------|---------------|
+| `queued` | Queued |
+| `processing` | Processing |
+| `success` | Success |
+| `failed` | Failed |
+| `cancelled` | Cancelled |
+
+#### `blockchain_verifications.result`
+
+| Raw value | Display label |
+|-----------|---------------|
+| `valid` | Valid |
+| `tampered` | Tampered |
+| `pending` | Pending |
+| `failed` | Failed |
+| `onchain_missing` | On-chain Missing |
+
+Implemented in `BlockchainStatusChip.jsx` and `BlockchainMonitoringRepository.js` (`formatStatusLabel`).
+
 ## 9. Security and privacy rules
 
 | Rule | Implementation |
@@ -229,9 +278,9 @@ Uses `standardTableHeadCellSx`, `standardTablePaperSx`, `standardTableRowSx`, `P
 
 | File | Coverage |
 |------|----------|
-| `BlockchainMonitoringRepository.test.js` | Query params, pagination, summary, payload safety, Sepolia URL |
-| `useBlockchainMonitoringController.test.jsx` | Mount load, refresh, filter updates |
-| `BlockchainMonitoringComponents.test.jsx` | Status chip, network badge, payload summary |
+| `BlockchainMonitoringRepository.test.js` | Query params, pagination, summary, payload safety, Sepolia URL; backend-aligned job/verification labels (`success`, `cancelled`, `tampered`, `onchain_missing`); unknown fallback via `formatStatusLabel` |
+| `useBlockchainMonitoringController.test.jsx` | Mount load; manual refresh reloads summary and records; filter change while first request is unresolved; stale first response does not overwrite latest response |
+| `BlockchainMonitoringComponents.test.jsx` | Record status chip; job `success` and `cancelled`; verification `tampered`, `failed`, and `onchain_missing`; unknown fallback; network badge; payload summary |
 
 ### Backend (`backend-laravel-v1`)
 
@@ -239,16 +288,27 @@ Uses `standardTableHeadCellSx`, `standardTablePaperSx`, `standardTableRowSx`, `P
 |------|----------|
 | `BlockchainMonitoringApiTest.php` | Summary auth (admin/operator/guard), search by hash/tx, status counts, entity_type filter |
 
-**Commands:**
+### Commands run / verification
+
+Reported results after M11 implementation and follow-up patch:
+
+| Command | Result |
+|---------|--------|
+| `yarn test --run` | **48 passed** (7 files) |
+| `yarn lint` | **0 errors** |
+| `yarn build` | **Success** |
+| `php artisan test --filter=Blockchain` | **227 passed** |
+| `php artisan test` | **348 passed** |
 
 ```bash
 cd frontend-react-v1
-yarn test
+yarn test --run
 yarn lint
 yarn build
 
 cd backend-laravel-v1
 php artisan test --filter=Blockchain
+php artisan test
 ```
 
 ## 11. Manual smoke-test steps

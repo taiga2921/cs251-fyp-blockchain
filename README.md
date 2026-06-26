@@ -218,7 +218,8 @@ blockchain-ethereum-v1/
     ├── m7-retry-and-failure-handling.md
     ├── m8-verification-system.md
     ├── m9-sepolia-deployment.md
-    └── m10-anpr-module-integration.md
+    ├── m10-anpr-module-integration.md
+    └── m11-blockchain-monitoring-frontend.md
 ```
 
 ## What does **not** belong here
@@ -230,6 +231,7 @@ blockchain-ethereum-v1/
 
 ## Documentation
 
+- [`docs/m11-blockchain-monitoring-frontend.md`](docs/m11-blockchain-monitoring-frontend.md) — M11 React monitoring dashboard summary
 - [`docs/m10-anpr-module-integration.md`](docs/m10-anpr-module-integration.md) — M10 ANPR auto-anchoring summary
 - [`docs/m9-sepolia-deployment.md`](docs/m9-sepolia-deployment.md) — M9 Sepolia deployment summary
 - [`docs/m8-verification-system.md`](docs/m8-verification-system.md) — M8 Laravel verification summary
@@ -243,15 +245,22 @@ blockchain-ethereum-v1/
 - [`docs/m0-architecture-finalization-and-repository-split.md`](docs/m0-architecture-finalization-and-repository-split.md) — M0 architecture decisions
 - [`blockchain-module.md`](blockchain-module.md) — full module plan (M0–M13)
 
+## Milestone status
+
+| Milestone | Scope | Status |
+| --- | --- | --- |
+| **M4** (Laravel) | Deterministic hashing (`BlockchainHashService`) | **Complete** |
+| **M5** (Laravel) | `BlockchainRecordService` — pending proof rows | **Complete** |
+| **M6** (Laravel) | Ganache anchoring (`EthereumRpcClient`, `AnchorBlockchainRecordJob`) | **Complete** |
+| **M7** (Laravel) | Retry strategy and failure handling | **Complete** |
+| **M8** (Laravel) | Verification system | **Complete** |
+| **M9** (this folder + Laravel) | Sepolia deployment and signed anchoring | **Complete** |
+| **M10** (Laravel + React detail) | ANPR auto-anchoring and detail proof visibility | **Complete** |
+| **M11** (frontend + Laravel summary API) | Blockchain monitoring dashboard via Laravel APIs | **Complete** |
+
 ## Next milestones
 
 | Milestone | Scope |
 | --- | --- |
-| **M4** (Laravel) | Deterministic hashing (`BlockchainHashService`) — **complete** |
-| **M5** (Laravel) | `BlockchainRecordService` — pending proof rows — **complete** |
-| **M6** (Laravel) | Ganache anchoring (`EthereumRpcClient`, `AnchorBlockchainRecordJob`) — **complete** |
-| **M7** (Laravel) | Retry strategy and failure handling — **complete** |
-| **M8** (Laravel) | Verification system — **complete** |
-| **M9** (this folder + Laravel) | Sepolia deployment and signed anchoring — **complete** |
-| **M10** (Laravel + React detail) | ANPR auto-anchoring and detail proof visibility — **complete** |
-| **M11** (frontend) | Blockchain monitoring dashboard via Laravel APIs |
+| **M12** | Patrol/profile blockchain proof extension, if enabled by the final roadmap scope. |
+| **M13** | Final hardening, demo evidence, screenshots, smoke tests, and documentation freeze. |
